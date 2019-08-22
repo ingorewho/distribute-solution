@@ -1,0 +1,9 @@
+server:
+  port: 9091
+
+spring:
+  application:
+    name: distribute-replay-test
+  redis:
+    host: localhost
+    port: 6379
