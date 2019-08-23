@@ -13,18 +13,12 @@ import org.aspectj.lang.annotation.Aspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
-import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StopWatch;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @Author renzhiqiang
@@ -41,6 +35,17 @@ public class ReplayAspect {
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
 
+    /**
+     * 处理重复请求：
+     * 思路：
+     * 1.根据参数和方法名格式化成json对象，然后进行md5加密，保证相同参数能够计算得到相同的md5值
+     * 2.md5值作为key，尝试去redis中获取对应数据，如果存在说明是重复请求，如果不存在则使用redis乐观锁去set数据，set成功执行业务逻辑，
+     *   set失败说明存在并发，仍认为是重复请求
+     * @param point
+     * @param replay
+     * @return
+     * @throws Throwable
+     */
     @Around("@annotation(replay)")
     public Object handReplay(ProceedingJoinPoint point, Replay replay) throws Throwable {
         //获取方法实例
