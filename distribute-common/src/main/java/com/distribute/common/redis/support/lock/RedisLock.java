@@ -18,7 +18,9 @@ import java.util.concurrent.TimeUnit;
 public class RedisLock {
 
     /**
-     * 使用乐观锁方式存储数据
+     * 使用乐观锁方式存储数据：
+     * redis乐观锁实现：在一个session中，通过watch命令监控一个key，通过multi命令开启事务，
+     * 执行一系列命令，如果过程中，这些命令中某个命令被其他线程执行了则整体执行失败，执行返回null
      *
      * @param keyValue
      * @param redisTemplate
@@ -30,10 +32,13 @@ public class RedisLock {
         SessionCallback<List<Boolean>> callback = new SessionCallback<List<Boolean>>() {
             @Override
             public List<Boolean> execute(RedisOperations operations) throws DataAccessException {
+                // redis监控一个key
                 operations.watch(keyValue.getKey());
+                // 开始事务
                 operations.multi();
                 operations.opsForValue().set(keyValue.getKey(), keyValue.getValue());
                 operations.expire(keyValue.getKey(), keyValue.getExpireTime(), TimeUnit.MILLISECONDS);
+                // 执行命令并结束事务
                 return operations.exec();
             }
         };
