@@ -4,6 +4,7 @@ import com.distribute.common.redis.base.RedisKeyValue;
 import com.distribute.common.redis.support.lock.RedisLock;
 import com.distribute.common.response.ApiResponse;
 import com.distribute.common.util.JsonUtil;
+import com.distribute.common.util.Md5Util;
 import com.distribute.replay.base.annotation.Replay;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
@@ -58,7 +59,7 @@ public class ReplayAspect {
                 Map<String, Object> map = new HashMap<>(2);
                 map.put("caller", caller);
                 map.put("args", args);
-                String cacheKey = JsonUtil.obj2json(map);
+                String cacheKey = Md5Util.md5(JsonUtil.obj2json(map));
                 boolean isReplayReq = repalyAction(replay, cacheKey);
                 if (isReplayReq) {
                     return ApiResponse.buildFailed("请勿重复提交.");
