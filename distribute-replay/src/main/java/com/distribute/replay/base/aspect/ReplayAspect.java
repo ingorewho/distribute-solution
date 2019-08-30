@@ -1,7 +1,7 @@
 package com.distribute.replay.base.aspect;
 
-import com.distribute.common.redis.base.RedisKeyValue;
-import com.distribute.common.redis.support.lock.RedisLock;
+import com.distribute.common.redis.RedisKey;
+import com.distribute.common.redis.support.lock.DistLock;
 import com.distribute.common.response.ApiResponse;
 import com.distribute.common.util.JsonUtil;
 import com.distribute.common.util.Md5Util;
@@ -30,10 +30,10 @@ import java.util.Map;
 public class ReplayAspect {
     private Logger logger = LoggerFactory.getLogger(ReplayAspect.class);
 
-    private static final String CACHE_VALUE = "value";
-
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
+    @Autowired
+    private DistLock distLock;
 
     /**
      * 处理重复请求：
@@ -94,12 +94,11 @@ public class ReplayAspect {
         if (redisTemplate.hasKey(cacheKey)) {
             return true;
         } else {
-            RedisKeyValue redisKeyValue = RedisKeyValue.newBuilder()
+            RedisKey redisKey = RedisKey.newBuilder()
                     .key(cacheKey)
-                    .value("value")
                     .expireTime(replay.expireTime())
                     .build();
-            return RedisLock.operateWithCasLock(redisKeyValue, redisTemplate);
+            return distLock.casLock(redisKey);
         }
     }
 
