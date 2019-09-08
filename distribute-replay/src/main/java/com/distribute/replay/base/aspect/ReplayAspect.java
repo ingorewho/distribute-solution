@@ -1,7 +1,7 @@
 package com.distribute.replay.base.aspect;
 
 import com.distribute.common.redis.RedisKey;
-import com.distribute.common.redis.support.lock.DistLock;
+import com.distribute.common.redis.support.lock.RedisDistLock;
 import com.distribute.common.response.ApiResponse;
 import com.distribute.common.util.JsonUtil;
 import com.distribute.common.util.Md5Util;
@@ -33,7 +33,7 @@ public class ReplayAspect {
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
     @Autowired
-    private DistLock distLock;
+    private RedisDistLock redisDistLock;
 
     /**
      * 处理重复请求：
@@ -98,7 +98,7 @@ public class ReplayAspect {
                     .key(cacheKey)
                     .expireTime(replay.expireTime())
                     .build();
-            return distLock.casLock(redisKey);
+            return redisDistLock.casLock(redisKey);
         }
     }
 
