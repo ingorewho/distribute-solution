@@ -11,7 +11,7 @@ import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.SessionCallback;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisCluster;
@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
  * @Description redis锁(乐观锁和悲观锁)
  * @Date 2019-08-22
  **/
-@Component
+@Service
 public class RedisDistLock implements DistLock {
     private static final Logger LOG = LoggerFactory.getLogger(RedisDistLock.class);
     public static final String UNLOCK_LUA;
